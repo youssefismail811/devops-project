@@ -43,9 +43,9 @@ resource "aws_instance" "Jenkins_Instance" {
   subnet_id                     = aws_subnet.Public_Subnet_1.id
   vpc_security_group_ids        = [ aws_security_group.main_sg.id ]
   associate_public_ip_address   = true
-  key_name                      = aws_key_pair.devops_key.key_name
-
-  user_data = file("scripts/jenkins_bootstrap.sh")
+  key_name                      = var.key_name
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  
   
   tags = {
     Name = "Jenkins Instance"
@@ -59,8 +59,9 @@ resource "aws_instance" "vault" {
   ami                    = var.ami
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.Private_Subnet_1.id
-  key_name               = aws_key_pair.devops_key.key_name
+  key_name               = var.key_name
   vpc_security_group_ids = [ aws_security_group.main_sg.id ]
+  iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
 
   tags = {
     Name = "Vault EC2"
@@ -74,9 +75,10 @@ resource "aws_instance" "sonarqube" {
   ami                    = var.ami
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.Private_Subnet_2.id
-  key_name               = aws_key_pair.devops_key.key_name
+  key_name               = var.key_name
   vpc_security_group_ids = [ aws_security_group.main_sg.id ]
-
+  iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
+  
   tags = {
     Name = "SonarQube EC2"
   }
