@@ -1,0 +1,41 @@
+{
+  "version": 4,
+  "terraform_version": "1.11.4",
+  "serial": 104,
+  "lineage": "ec8ef8a3-9a24-13dd-912a-56a0988eeb1d",
+  "outputs": {},
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "ec2_instance_role",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::646304591001:role/ec2-instance-role",
+            "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"}}],\"Version\":\"2012-10-17\"}",
+            "create_date": "2025-04-19T03:24:20Z",
+            "description": "",
+            "force_detach_policies": false,
+            "id": "ec2-instance-role",
+            "inline_policy": [],
+            "managed_policy_arns": [],
+            "max_session_duration": 3600,
+            "name": "ec2-instance-role",
+            "name_prefix": "",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": {},
+            "tags_all": {},
+            "unique_id": "AROAZM6WBNSMTXR4WNHQB"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

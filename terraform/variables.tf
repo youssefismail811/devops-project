@@ -78,3 +78,20 @@ variable "key_name" {
   description = "The name of the key pair to use for SSH access"
   type        = string
 }
+#------------------------------#
+variable "db_username" {
+  description = "Username for the RDS"
+  type        = string
+}
+#------------------------------#
+variable "db_password" {
+  description = "Password for the RDS"
+  type        = string
+  sensitive   = true
+}
+#------------------------------#
+variable "db_name" {
+  description = "Database name"
+  type        = string
+}
+#------------------------------#
