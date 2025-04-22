@@ -10,20 +10,6 @@ pipeline {
   }
 
   stages {
-    stage('Checkout Code') {
-      steps {
-        git branch: 'main', url: 'https://github.com/youssefismail811/devops-project.git'
-      }
-    }
-
-    stage('Build with Maven') {
-      steps {
-        dir('backend') {
-          sh 'mvn clean install'
-        }
-      }
-    }
-
     stage('Read secrets from Vault') {
       steps {
         withVault(
@@ -64,11 +50,9 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        dir('backend') {
-          sh '''
-            docker build -t $ECR_REPO:$IMAGE_TAG .
-          '''
-        }
+        sh '''
+          docker build -t $ECR_REPO:$IMAGE_TAG .
+        '''
       }
     }
 
