@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     VAULT_ADDR = 'http://13.57.42.215/:8200' 
+  }
   stages {
     stage('Fetch AWS Secrets from Vault') {
       steps {
@@ -24,5 +25,4 @@ pipeline {
       }
     }
   }
-}
 }
