@@ -25,10 +25,12 @@ pipeline {
             vaultUrl: "${env.VAULT_ADDR}"
           ]
         ) {
-          sh '''
-            echo "Access Key: ${access_key}"
-            echo "Secret Key: ${secret_key}"
-          '''
+          withEnv(["AWS_ACCESS_KEY_ID=${access_key}", "AWS_SECRET_ACCESS_KEY=${secret_key}"]) {
+            sh '''
+              echo "Access Key: $AWS_ACCESS_KEY_ID"
+              echo "Secret Key: $AWS_SECRET_ACCESS_KEY"
+            '''
+          }
         }
       }
     }
@@ -36,8 +38,8 @@ pipeline {
     stage('Login to ECR') {
       steps {
         sh '''
-          aws configure set aws_access_key_id $access_key
-          aws configure set aws_secret_access_key $secret_key
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
         '''
       }
