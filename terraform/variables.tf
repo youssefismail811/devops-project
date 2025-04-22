@@ -95,3 +95,9 @@ variable "db_name" {
   type        = string
 }
 #------------------------------#
+variable "chami" {
+  description = "AMI ID for the Jenkins instance"
+  type        = string
+  
+}
+#------------------------------#

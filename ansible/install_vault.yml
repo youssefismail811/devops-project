@@ -1,0 +1,53 @@
+---
+- name: Install and configure HashiCorp Vault
+  hosts: vault
+  become: true
+
+  tasks:
+    - name: Add HashiCorp GPG key
+      apt_key:
+        url: https://apt.releases.hashicorp.com/gpg
+        state: present
+
+    - name: Add HashiCorp APT repository
+      apt_repository:
+        repo: deb [arch=amd64] https://apt.releases.hashicorp.com focal main
+        state: present
+        filename: hashicorp
+
+    - name: Update apt and install Vault
+      apt:
+        name: vault
+        state: present
+        update_cache: yes
+
+    - name: Enable Vault systemd service
+      systemd:
+        name: vault
+        enabled: yes
+
+    - name: Run Vault in dev mode (for testing only!)
+      shell: |
+        export VAULT_DEV_ROOT_TOKEN_ID="root"
+        nohup vault server -dev > /tmp/vault.log 2>&1 &
+      args:
+        executable: /bin/bash
+      environment:
+        VAULT_ADDR: http://127.0.0.1:8200
+
+    - name: Wait for Vault to start
+      wait_for:
+        port: 8200
+        state: started
+        delay: 5
+        timeout: 30
+
+    - name: Enable KV secrets engine on path secret/
+      shell: |
+        export VAULT_ADDR=http://127.0.0.1:8200
+        export VAULT_TOKEN=root
+        vault secrets enable -path=secret kv
+      args:
+        executable: /bin/bash
+      register: vault_enable
+      failed_when: "'path is already in use' not in vault_enable.stderr and vault_enable.rc != 0"

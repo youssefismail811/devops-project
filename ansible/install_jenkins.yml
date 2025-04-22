@@ -1,0 +1,48 @@
+---
+- name: Install Jenkins and Java 17 on Amazon Linux EC2
+  hosts: jenkins
+  become: yes
+
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install Java 17 (Amazon Corretto)
+      yum:
+        name: java-17-amazon-corretto
+        state: present
+
+    - name: Create keyrings directory if it doesn't exist
+      file:
+        path: /usr/share/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+
+    - name: Add Jenkins repo
+      get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+
+    - name: Import Jenkins GPG key
+      rpm_key:
+        state: present
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+    - name: Install Jenkins
+      yum:
+        name: jenkins
+        state: present
+
+    - name: Enable and start Jenkins service
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started

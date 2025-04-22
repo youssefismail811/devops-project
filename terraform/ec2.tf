@@ -4,69 +4,55 @@ data "aws_iam_instance_profile" "ec2_instance_profile" {
   
 }
 
-# -------------------------------#
-# Security Group
-# -------------------------------#
 resource "aws_security_group" "main_sg" {
-  vpc_id = aws_vpc.mainvpc.id
-  name   = "Main Security Group Allow SSH and HTTP"
-  description = "Main security group for the VPC"
-
+  name        = "devops-services-sg"
+  description = "Security group for Jenkins and DevOps services"
+  vpc_id      = aws_vpc.mainvpc.id
   ingress {
-    description = "SSH access"
+    description = "SSH from your IP"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [ var.cidrs ] 
+    cidr_blocks = [var.cidrs] 
   }
 
   ingress {
-    description = "Jenkins Web UI"
+    description = "Jenkins UI (Port 8080)"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = [ var.cidrs ]
+    cidr_blocks = [var.cidrs] 
   }
+
   ingress {
-    description = "Valut Web UI"
-    from_port   = 8200
-    to_port     = 8200
-    protocol    = "tcp"
-    cidr_blocks = [ var.cidrs ]
-  }
-  ingress {
-    description = "Allow HTTPS"
-    from_port = 443 
-    to_port = 443 
-    protocol = "tcp"
-    cidr_blocks = [ var.cidrs ]
-  }
-  ingress {
-    description = "SonarQube Web UI"
+    description = "SonarQube UI (Port 9000)"
     from_port   = 9000
     to_port     = 9000
     protocol    = "tcp"
-    cidr_blocks = [ var.cidrs ]
+    cidr_blocks = [var.cidrs]
   }
+
   ingress {
-  description = "HTTP access"
-  from_port   = 80
-  to_port     = 80
-  protocol    = "tcp"
-  cidr_blocks = [ var.cidrs ]
-}
+    description = "Vault UI/API (Port 8200)"
+    from_port   = 8200
+    to_port     = 8200
+    protocol    = "tcp"
+    cidr_blocks = [var.cidrs]
+  }
 
   egress {
+    description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = [ var.cidrs ]
+    cidr_blocks = [var.cidrs]
   }
 
   tags = {
-    Name = "Main Security Group"
+    Name = "devops-services-sg"
   }
 }
+
 
 # -------------------------------#
 # Jenkins EC2 Instance
@@ -90,9 +76,9 @@ resource "aws_instance" "Jenkins_Instance" {
 # Vault EC2 Instance
 #--------------------------------#
 resource "aws_instance" "vault" {
-  ami                         = var.ami
+  ami                         = var.chami
   instance_type               = var.instance_type
-  subnet_id                   = aws_subnet.Private_Subnet_1.id
+  subnet_id                   = aws_subnet.Public_Subnet_1.id
   key_name                    = var.key_name
   vpc_security_group_ids      = [ aws_security_group.main_sg.id ]
   iam_instance_profile        = data.aws_iam_instance_profile.ec2_instance_profile.name
@@ -107,9 +93,9 @@ resource "aws_instance" "vault" {
 # SonarQube EC2
 # -------------------------------#
 resource "aws_instance" "sonarqube" {
-  ami                           = var.ami
-  instance_type                 = var.instance_type
-  subnet_id                     = aws_subnet.Private_Subnet_2.id
+  ami                           = var.chami
+  instance_type                 = "t3.medium"
+  subnet_id                     = aws_subnet.Public_Subnet_1.id
   key_name                      = var.key_name
   vpc_security_group_ids        = [ aws_security_group.main_sg.id ]
   iam_instance_profile          = data.aws_iam_instance_profile.ec2_instance_profile.name

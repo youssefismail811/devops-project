@@ -1,0 +1,133 @@
+---
+- name: Install and configure SonarQube on Ubuntu
+  hosts: sonarqube
+  become: yes
+  vars:
+    sonar_version: "10.4.1.88267"
+    sonar_user: sonar
+    sonar_password: sonar
+    sonar_db: sonardb
+    sonar_download_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonar_version }}.zip"
+
+  tasks:
+
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - unzip
+          - openjdk-17-jdk
+          - wget
+          - postgresql
+          - postgresql-contrib
+        state: present
+
+    - name: Ensure PostgreSQL is started
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: Install psycopg2 for PostgreSQL modules
+      become: true
+      apt:
+        name: python3-psycopg2
+        state: present
+        update_cache: true
+
+    - name: Create SonarQube PostgreSQL user
+      shell: |
+        sudo -u postgres psql -c "CREATE USER {{ sonar_user }} WITH PASSWORD '{{ sonar_password }}';"
+      args:
+        executable: /bin/bash
+
+      ignore_errors: true
+
+    - name: Create SonarQube PostgreSQL database
+      shell: |
+        sudo -u postgres psql -c "CREATE DATABASE {{ sonar_db }} OWNER {{ sonar_user }} ENCODING 'UTF8';"
+      args:
+        executable: /bin/bash
+
+      ignore_errors: true
+
+    
+
+    - name: Add sonar user
+      user:
+        name: sonar
+        shell: /sbin/nologin
+        system: yes
+        create_home: no
+
+    - name: Download SonarQube
+      get_url:
+        url: "{{ sonar_download_url }}"
+        dest: /opt/sonarqube.zip
+        mode: '0644'
+
+    - name: Unzip SonarQube
+      unarchive:
+        src: /opt/sonarqube.zip
+        dest: /opt/
+        remote_src: yes
+
+    - name: Rename SonarQube folder
+      command: mv /opt/sonarqube-{{ sonar_version }} /opt/sonarqube
+      args:
+        creates: /opt/sonarqube
+
+    - name: Set ownership for SonarQube directory
+      file:
+        path: /opt/sonarqube
+        owner: sonar
+        group: sonar
+        recurse: yes
+
+    - name: Configure SonarQube DB connection
+      lineinfile:
+        path: /opt/sonarqube/conf/sonar.properties
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      loop:
+        - { regexp: '^#sonar.jdbc.username=', line: "sonar.jdbc.username={{ sonar_user }}" }
+        - { regexp: '^#sonar.jdbc.password=', line: "sonar.jdbc.password={{ sonar_password }}" }
+        - { regexp: '^#sonar.jdbc.url=', line: "sonar.jdbc.url=jdbc:postgresql://localhost/{{ sonar_db }}" }
+
+    - name: Configure systemd service for SonarQube
+      copy:
+        dest: /etc/systemd/system/sonarqube.service
+        content: |
+          [Unit]
+          Description=SonarQube service
+          After=syslog.target network.target
+
+          [Service]
+          Type=forking
+
+          ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+          ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+
+          User=sonar
+          Group=sonar
+          Restart=always
+          LimitNOFILE=65536
+          LimitNPROC=4096
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      command: systemctl daemon-reexec
+
+    - name: Enable and start SonarQube service
+      systemd:
+        name: sonarqube
+        enabled: yes
+        state: started
+
