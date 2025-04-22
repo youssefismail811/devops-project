@@ -1,0 +1,22 @@
+# Git
+.git/
+.gitignore
+
+# System/IDE
+.DS_Store
+.idea/
+*.swp
+
+# Sensitive files
+.env
+*.key
+*.pem
+
+# Dependencies (PHP)
+vendor/
+
+# Logs
+*.log
+
+# CI/CD files
+Jenkinsfile
