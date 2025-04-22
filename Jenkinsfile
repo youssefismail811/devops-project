@@ -4,9 +4,9 @@ pipeline {
   environment {
     VAULT_ADDR = 'http://13.57.42.215:8200'
     AWS_REGION = 'us-west-1'
-    ECR_REPO = 'devops-ecr-repo' 
+    ECR_REPO = 'devops-ecr-repo'
     IMAGE_TAG = 'latest'
-    ACCOUNT_ID = '646304591001' 
+    ACCOUNT_ID = '646304591001'
   }
 
   stages {
@@ -25,12 +25,15 @@ pipeline {
             vaultUrl: "${env.VAULT_ADDR}"
           ]
         ) {
-          withEnv(["AWS_ACCESS_KEY_ID=${access_key}", "AWS_SECRET_ACCESS_KEY=${secret_key}"]) {
-            sh '''
-              echo "Access Key: $AWS_ACCESS_KEY_ID"
-              echo "Secret Key: $AWS_SECRET_ACCESS_KEY"
-            '''
+          script {
+            env.AWS_ACCESS_KEY_ID = access_key
+            env.AWS_SECRET_ACCESS_KEY = secret_key
           }
+
+          sh '''
+            echo "Access Key: $AWS_ACCESS_KEY_ID"
+            echo "Secret Key: $AWS_SECRET_ACCESS_KEY"
+          '''
         }
       }
     }
@@ -63,3 +66,4 @@ pipeline {
     }
   }
 }
+
