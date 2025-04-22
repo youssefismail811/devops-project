@@ -12,13 +12,15 @@ pipeline {
   stages {
     stage('Checkout Code') {
       steps {
-        git url: 'https://github.com/youssefismail811/devops-project.git', branch: 'main'
+        git 'https://github.com/youssefismail811/devops-project.git'
       }
     }
 
     stage('Build with Maven') {
       steps {
-        sh 'mvn clean install'
+        dir('backend') {
+          sh 'mvn clean install'
+        }
       }
     }
 
@@ -62,9 +64,11 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh '''
-          docker build -t $ECR_REPO:$IMAGE_TAG .
-        '''
+        dir('backend') {
+          sh '''
+            docker build -t $ECR_REPO:$IMAGE_TAG .
+          '''
+        }
       }
     }
 
