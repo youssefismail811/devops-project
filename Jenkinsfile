@@ -10,6 +10,18 @@ pipeline {
   }
 
   stages {
+    stage('Checkout Code') {
+      steps {
+        git url: 'https://github.com/youssefismail811/devops-project.git', branch: 'main'
+      }
+    }
+
+    stage('Build with Maven') {
+      steps {
+        sh 'mvn clean install'
+      }
+    }
+
     stage('Read secrets from Vault') {
       steps {
         withVault(
@@ -66,4 +78,3 @@ pipeline {
     }
   }
 }
-
