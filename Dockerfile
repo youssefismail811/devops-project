@@ -1,11 +1,11 @@
-# Use an official Java runtime as a parent image
-FROM openjdk:11-jre-slim
+# Use official PHP-Apache image
+FROM php:8.2-apache
 
-# Copy the jar file to the container
-COPY target/your-app.jar /app/your-app.jar
+# Copy all files to the container
+COPY . /var/www/html/
 
-# Define the command to run the application
-ENTRYPOINT ["java", "-jar", "/app/your-app.jar"]
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
-# Expose the port (if necessary)
-EXPOSE 8080
+# Expose port 80
+EXPOSE 80
