@@ -10,7 +10,7 @@ pipeline {
       steps {
         withVault(
           vaultSecrets: [[
-            path: 'secret/jenkins/aws',
+            path: 'jenkins/aws',
             secretValues: [
               [envVar: 'access_key', vaultKey: 'access_key'],
               [envVar: 'secret_key', vaultKey: 'secret_key']
