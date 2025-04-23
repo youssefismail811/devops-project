@@ -9,7 +9,7 @@ pipeline {
         ACCOUNT_ID = '646304591001'
         HELM_VERSION = '3.12.0'
         NAMESPACE = 'default'
-        KUBECONFIG = credentials('kubeconfig')
+        KUBECONFIG = credentials('kubeconfig') // تأكد إن ده معرف في Jenkins Credentials
         PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
@@ -105,7 +105,7 @@ pipeline {
 
     post {
         always {
-            script {
+            node {
                 cleanWs()
                 sh '''
                     echo "=== Cleaning up Docker ==="
@@ -116,7 +116,7 @@ pipeline {
             }
         }
         failure {
-            script {
+            node {
                 sh '''
                     echo "=== Attempting Rollback ==="
                     export KUBECONFIG=${KUBECONFIG}
