@@ -4,8 +4,8 @@ image:
   tag: latest
 
 service:
-  type: LoadBalancer
-  port: 80
+  type: NodePort
+
 
 replicaCount: 2
 
