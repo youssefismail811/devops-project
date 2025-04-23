@@ -30,10 +30,15 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                echo "=== Running Unit Tests ==="
-                sh 'mvn test' 
+                script {
+                    echo '=== Running Unit Tests ==='
+                    dir('my-java-project') {
+                    sh 'mvn test'
+                        }
+                }
             }
         }
+
 
         stage('SonarQube Scan') {
             environment {
