@@ -1,29 +1,24 @@
 pipeline {
     agent any
-
     environment {
         VAULT_ADDR = 'http://13.57.42.215:8200'
         AWS_REGION = 'us-west-1'
         ECR_REPO = 'devops-ecr-repo'
-        IMAGE_TAG = 'latest'
+        IMAGE_TAG = 'latest' 
         ACCOUNT_ID = '646304591001'
         HELM_VERSION = '3.12.0'
         NAMESPACE = 'default'
-        KUBECONFIG = credentials('kubeconfig')
+        // Persist Helm installation path
         PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
     stages {
-        stage('Verify Cluster Access') {
+        stage('Verify Files') {
             steps {
-                sh '''
-                    echo "=== Verifying Kubernetes Access ==="
-                    kubectl cluster-info
-                    kubectl get ns
-                '''
+                sh 'ls -la'
             }
         }
-
+        
         stage('Build & Push Docker Image') {
             steps {
                 withVault(
@@ -67,7 +62,7 @@ pipeline {
                     curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar -xz -C /tmp
                     mv /tmp/linux-amd64/helm ${HOME}/bin/helm
                     chmod +x ${HOME}/bin/helm
-                    helm version
+                    ${HOME}/bin/helm version
                 '''
             }
         }
@@ -77,7 +72,6 @@ pipeline {
                 dir('helm') {
                     sh '''
                         echo "=== Deploying with Helm ==="
-                        export KUBECONFIG=${KUBECONFIG}
                         helm upgrade --install my-app . \
                             --namespace ${NAMESPACE} \
                             --set image.repository=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO} \
@@ -94,7 +88,6 @@ pipeline {
             steps {
                 sh '''
                     echo "=== Verifying Deployment ==="
-                    export KUBECONFIG=${KUBECONFIG}
                     helm status my-app -n ${NAMESPACE}
                     kubectl get pods -n ${NAMESPACE}
                     kubectl get svc -n ${NAMESPACE}
@@ -116,12 +109,8 @@ pipeline {
         failure {
             sh '''
                 echo "=== Attempting Rollback ==="
-                export KUBECONFIG=${KUBECONFIG}
                 helm rollback my-app 0 -n ${NAMESPACE} || true
-                echo "=== Cluster Status ==="
-                kubectl get all -n ${NAMESPACE} || true
             '''
         }
     }
 }
-
