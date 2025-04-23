@@ -9,7 +9,7 @@ pipeline {
         ACCOUNT_ID = '646304591001'
         HELM_VERSION = '3.12.0'
         NAMESPACE = 'default'
-        KUBECONFIG = credentials('kubeconfig') // تأكد إن ده معرف في Jenkins Credentials
+        KUBECONFIG = credentials('kubeconfig')
         PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
@@ -105,26 +105,23 @@ pipeline {
 
     post {
         always {
-            node {
-                cleanWs()
-                sh '''
-                    echo "=== Cleaning up Docker ==="
-                    docker rmi ${ECR_REPO}:${IMAGE_TAG} || true
-                    docker rmi ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} || true
-                    docker system prune -f || true
-                '''
-            }
+            cleanWs()
+            sh '''
+                echo "=== Cleaning up Docker ==="
+                docker rmi ${ECR_REPO}:${IMAGE_TAG} || true
+                docker rmi ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} || true
+                docker system prune -f || true
+            '''
         }
         failure {
-            node {
-                sh '''
-                    echo "=== Attempting Rollback ==="
-                    export KUBECONFIG=${KUBECONFIG}
-                    helm rollback my-app 0 -n ${NAMESPACE} || true
-                    echo "=== Cluster Status ==="
-                    kubectl get all -n ${NAMESPACE} || true
-                '''
-            }
+            sh '''
+                echo "=== Attempting Rollback ==="
+                export KUBECONFIG=${KUBECONFIG}
+                helm rollback my-app 0 -n ${NAMESPACE} || true
+                echo "=== Cluster Status ==="
+                kubectl get all -n ${NAMESPACE} || true
+            '''
         }
     }
 }
+
