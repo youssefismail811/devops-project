@@ -57,16 +57,20 @@ pipeline {
             }
         }
 
-        stage('Install Helm') {
-            steps {
-                sh '''
-                    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-                    chmod 700 get_helm.sh
-                    ./get_helm.sh --version v${HELM_VERSION}
-                    helm version
-                '''
-            }
-        }
+       stage('Install Helm') {
+        steps {
+          sh '''
+            # Download and install Helm without sudo
+            curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar -xz -C /tmp
+            mkdir -p ${HOME}/bin
+            mv /tmp/linux-amd64/helm ${HOME}/bin/helm
+            chmod +x ${HOME}/bin/helm
+            export PATH="${HOME}/bin:${PATH}"
+            helm version
+          '''
+    }
+}
+        
 
         stage('Deploy Application') {
             steps {
