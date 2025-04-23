@@ -8,7 +8,7 @@ pipeline {
         ACCOUNT_ID = '646304591001'
         HELM_VERSION = '3.12.0'
         NAMESPACE = 'default'
-        EKS_CLUSTER_NAME = 'eks'  // اسم EKS cluster الخاص بك
+        EKS_CLUSTER_NAME = 'eks'
         PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
@@ -25,6 +25,31 @@ pipeline {
                     echo "=== Setting up kubeconfig ==="
                     aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
                 '''
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                echo "=== Running Unit Tests ==="
+                sh './gradlew test' // أو استبدله بـ mvn test أو npm test حسب نوع المشروع
+            }
+        }
+
+        stage('SonarQube Scan') {
+            environment {
+                SONARQUBE_SCANNER_HOME = tool 'SonarQube Scanner'
+            }
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                        echo "=== Running SonarQube Scan ==="
+                        ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
+                          -Dsonar.projectKey=devops-project \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=$SONAR_HOST_URL \
+                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
             }
         }
 
