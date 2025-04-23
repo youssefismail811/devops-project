@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         VAULT_ADDR = 'http://13.57.42.215:8200'
         AWS_REGION = 'us-west-1'
@@ -28,26 +29,27 @@ pipeline {
             }
         }
 
-        stages {
-
         stage('Unit Tests') {
             steps {
-                sh 'vendor/bin/phpunit || true'
+                    echo "=== Running PHP Unit Tests ==="
+                    sh './vendor/bin/phpunit'
             }
         }
 
-        stage('SonarQube Analysis') {
+
+        stage('SonarQube Scan') {
             environment {
-                SONAR_TOKEN = credentials('sonar-token')
+                SONARQUBE_SCANNER_HOME = tool 'SonarQube Scanner'
             }
             steps {
-                withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                withSonarQubeEnv('sonarqube') {
                     sh '''
-                    sonar-scanner \
-                      -Dsonar.projectKey=php-devops \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=$SONAR_HOST_URL \
-                      -Dsonar.login=$SONAR_TOKEN
+                        echo "=== Running SonarQube Scan ==="
+                        ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
+                          -Dsonar.projectKey=devops-project \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=$SONAR_HOST_URL \
+                          -Dsonar.login=$SONAR_AUTH_TOKEN
                     '''
                 }
             }
@@ -114,10 +116,9 @@ pipeline {
                             --timeout 5m \
                             --wait
 
-                        # Apply additional configurations for RBAC, NetworkPolicy, and HPA
-                        kubectl apply -f helm/templates/rbac.yaml || true
-                        kubectl apply -f helm/templates/networkpolicy.yaml || true
-                        kubectl apply -f helm/templates/hpa.yaml || true
+                        kubectl apply -f templates/rbac.yaml || true
+                        kubectl apply -f templates/networkpolicy.yaml || true
+                        kubectl apply -f templates/hpa.yaml || true
                     '''
                 }
             }
@@ -152,5 +153,4 @@ pipeline {
             '''
         }
     }
-}
 }
