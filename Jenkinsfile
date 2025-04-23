@@ -104,22 +104,26 @@ pipeline {
 
     post {
         always {
-            cleanWs()
-            sh '''
-                echo "=== Cleaning up Docker ==="
-                docker rmi ${ECR_REPO}:${IMAGE_TAG} || true
-                docker rmi ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} || true
-                docker system prune -f || true
-            '''
+            node {
+                cleanWs()
+                sh '''
+                    echo "=== Cleaning up Docker ==="
+                    docker rmi ${ECR_REPO}:${IMAGE_TAG} || true
+                    docker rmi ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} || true
+                    docker system prune -f || true
+                '''
+            }
         }
         failure {
-            sh '''
-                echo "=== Attempting Rollback ==="
-                export KUBECONFIG=${KUBECONFIG}
-                helm rollback my-app 0 -n ${NAMESPACE} || true
-                echo "=== Cluster Status ==="
-                kubectl get all -n ${NAMESPACE} || true
-            '''
+            node {
+                sh '''
+                    echo "=== Attempting Rollback ==="
+                    export KUBECONFIG=${KUBECONFIG}
+                    helm rollback my-app 0 -n ${NAMESPACE} || true
+                    echo "=== Cluster Status ==="
+                    kubectl get all -n ${NAMESPACE} || true
+                '''
+            }
         }
     }
 }
