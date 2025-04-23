@@ -1,0 +1,12 @@
+.git
+*.tgz
+*.tar.gz
+*.tar
+*.zip
+*.jar
+*.war
+*.class
+node_modules/
+vendor/
+*.log
+*.tmp
