@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         VAULT_ADDR = 'http://13.57.42.215:8200'
         AWS_REGION = 'us-west-1'
@@ -8,7 +9,7 @@ pipeline {
         ACCOUNT_ID = '646304591001'
         HELM_VERSION = '3.12.0'
         NAMESPACE = 'default'
-        KUBECONFIG = credentials('kubeconfig')  // Add your kubeconfig credential ID
+        KUBECONFIG = credentials('kubeconfig')
         PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
@@ -104,7 +105,7 @@ pipeline {
 
     post {
         always {
-            node {
+            script {
                 cleanWs()
                 sh '''
                     echo "=== Cleaning up Docker ==="
@@ -115,7 +116,7 @@ pipeline {
             }
         }
         failure {
-            node {
+            script {
                 sh '''
                     echo "=== Attempting Rollback ==="
                     export KUBECONFIG=${KUBECONFIG}
