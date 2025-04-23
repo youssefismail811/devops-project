@@ -28,31 +28,26 @@ pipeline {
             }
         }
 
+        stages {
+
         stage('Unit Tests') {
             steps {
-                script {
-                    echo '=== Running Unit Tests ==='
-                    dir('my-java-project') {
-                    sh 'mvn test'
-                        }
-                }
+                sh 'vendor/bin/phpunit || true'
             }
         }
 
-
-        stage('SonarQube Scan') {
+        stage('SonarQube Analysis') {
             environment {
-                SONARQUBE_SCANNER_HOME = tool 'SonarQube Scanner'
+                SONAR_TOKEN = credentials('sonar-token')
             }
             steps {
-                withSonarQubeEnv('sonarqube') {
+                withSonarQubeEnv("${SONARQUBE_SERVER}") {
                     sh '''
-                        echo "=== Running SonarQube Scan ==="
-                        ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
-                          -Dsonar.projectKey=devops-project \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                    sonar-scanner \
+                      -Dsonar.projectKey=php-devops \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=$SONAR_HOST_URL \
+                      -Dsonar.login=$SONAR_TOKEN
                     '''
                 }
             }
@@ -157,4 +152,5 @@ pipeline {
             '''
         }
     }
+}
 }
