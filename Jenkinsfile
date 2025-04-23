@@ -8,6 +8,7 @@ pipeline {
         ACCOUNT_ID = '646304591001'
         HELM_VERSION = '3.12.0'
         NAMESPACE = 'default'
+        EKS_CLUSTER_NAME = 'eks'  // اسم EKS cluster الخاص بك
         // Persist Helm installation path
         PATH = "${env.HOME}/bin:${env.PATH}"
     }
@@ -19,6 +20,15 @@ pipeline {
             }
         }
         
+        stage('Configure Kubeconfig') {
+            steps {
+                sh '''
+                    echo "=== Setting up kubeconfig ==="
+                    aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
+                '''
+            }
+        }
+
         stage('Build & Push Docker Image') {
             steps {
                 withVault(
