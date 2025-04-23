@@ -4,12 +4,11 @@ pipeline {
         VAULT_ADDR = 'http://13.57.42.215:8200'
         AWS_REGION = 'us-west-1'
         ECR_REPO = 'devops-ecr-repo'
-        IMAGE_TAG = 'latest' 
+        IMAGE_TAG = 'latest'
         ACCOUNT_ID = '646304591001'
         HELM_VERSION = '3.12.0'
         NAMESPACE = 'default'
         EKS_CLUSTER_NAME = 'eks'  // اسم EKS cluster الخاص بك
-        // Persist Helm installation path
         PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
@@ -19,7 +18,7 @@ pipeline {
                 sh 'ls -la'
             }
         }
-        
+
         stage('Configure Kubeconfig') {
             steps {
                 sh '''
@@ -89,6 +88,11 @@ pipeline {
                             --atomic \
                             --timeout 5m \
                             --wait
+
+                        # Apply additional configurations for RBAC, NetworkPolicy, and HPA
+                        kubectl apply -f rbac.yaml
+                        kubectl apply -f networkpolicy.yaml
+                        kubectl apply -f hpa.yaml
                     '''
                 }
             }
