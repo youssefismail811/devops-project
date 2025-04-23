@@ -31,7 +31,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo "=== Running Unit Tests ==="
-                sh './gradlew test' // أو استبدله بـ mvn test أو npm test حسب نوع المشروع
+                sh 'npm test' 
             }
         }
 
