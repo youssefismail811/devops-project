@@ -1,14 +1,15 @@
 pipeline {
     agent any
-
     environment {
         VAULT_ADDR = 'http://13.57.42.215:8200'
         AWS_REGION = 'us-west-1'
         ECR_REPO = 'devops-ecr-repo'
-        IMAGE_TAG = 'latest'
+        IMAGE_TAG = 'latest' 
         ACCOUNT_ID = '646304591001'
-        HELM_VERSION = '3.12.0'  // Added Helm version
-        NAMESPACE = 'default'    // Added namespace
+        HELM_VERSION = '3.12.0'
+        NAMESPACE = 'default'
+        // Persist Helm installation path
+        PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -48,34 +49,29 @@ pipeline {
 
                         echo "=== Pushing image to ECR ==="
                         docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-                        
-                        echo "=== Cleanup ==="
-                        docker rmi $ECR_REPO:$IMAGE_TAG
-                        docker rmi $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
                     '''
                 }
             }
         }
 
-       stage('Install Helm') {
-        steps {
-          sh '''
-            # Download and install Helm without sudo
-            curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar -xz -C /tmp
-            mkdir -p ${HOME}/bin
-            mv /tmp/linux-amd64/helm ${HOME}/bin/helm
-            chmod +x ${HOME}/bin/helm
-            export PATH="${HOME}/bin:${PATH}"
-            helm version
-          '''
-    }
-}
-        
+        stage('Install Helm') {
+            steps {
+                sh '''
+                    echo "=== Installing Helm ==="
+                    mkdir -p ${HOME}/bin
+                    curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar -xz -C /tmp
+                    mv /tmp/linux-amd64/helm ${HOME}/bin/helm
+                    chmod +x ${HOME}/bin/helm
+                    ${HOME}/bin/helm version
+                '''
+            }
+        }
 
         stage('Deploy Application') {
             steps {
                 dir('helm') {
                     sh '''
+                        echo "=== Deploying with Helm ==="
                         helm upgrade --install my-app . \
                             --namespace ${NAMESPACE} \
                             --set image.repository=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO} \
@@ -91,6 +87,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh '''
+                    echo "=== Verifying Deployment ==="
                     helm status my-app -n ${NAMESPACE}
                     kubectl get pods -n ${NAMESPACE}
                     kubectl get svc -n ${NAMESPACE}
@@ -103,16 +100,17 @@ pipeline {
         always {
             cleanWs()
             sh '''
-                echo "=== Cleanup Docker images ==="
+                echo "=== Cleaning up Docker ==="
+                docker rmi ${ECR_REPO}:${IMAGE_TAG} || true
+                docker rmi ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} || true
                 docker system prune -f || true
             '''
         }
-        success {
-            echo 'Pipeline completed successfully'
-        }
         failure {
-            echo 'Pipeline failed'
-            sh 'helm rollback my-app 0 -n ${NAMESPACE} || true'
+            sh '''
+                echo "=== Attempting Rollback ==="
+                helm rollback my-app 0 -n ${NAMESPACE} || true
+            '''
         }
     }
 }
