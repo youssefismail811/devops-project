@@ -1,0 +1,18 @@
+image:
+  repository: 646304591001.dkr.ecr.us-west-1.amazonaws.com/devops-ecr-repo
+  pullPolicy: Always
+  tag: latest
+
+service:
+  type: LoadBalancer
+  port: 80
+
+replicaCount: 2
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi

@@ -54,6 +54,29 @@ pipeline {
         }
       }
     }
+    stage('Install Helm') {
+      steps {
+                sh '''
+                curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+                chmod 700 get_helm.sh
+                ./get_helm.sh --version v${HELM_VERSION}
+                helm version
+                '''
+            }
+    }
+    stage('Deploy Application') {
+      steps {
+                dir('helm') {
+                    sh '''
+                    helm upgrade --install my-app . \
+                      --namespace ${NAMESPACE} \
+                      --set image.repository=${ECR_REPO} \
+                      --set image.tag=${GIT_COMMIT} \
+                      --atomic \
+                      --timeout 5m \
+                      --wait
+                    '''
+                }
   }
 
   post {
