@@ -29,13 +29,19 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
+        stage('Install Dependencies') {
             steps {
-                    echo "=== Running PHP Unit Tests ==="
-                    sh './vendor/bin/phpunit'
+                echo "=== Installing PHP Dependencies with Composer ==="
+                sh 'composer install'
             }
         }
 
+        stage('Unit Tests') {
+            steps {
+                echo "=== Running PHP Unit Tests ==="
+                sh './vendor/bin/phpunit'
+            }
+        }
 
         stage('SonarQube Scan') {
             environment {
