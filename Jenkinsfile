@@ -90,9 +90,9 @@ pipeline {
                             --wait
 
                         # Apply additional configurations for RBAC, NetworkPolicy, and HPA
-                        kubectl apply -f helm/templates/rbac.yaml
-                        kubectl apply -f helm/templates/networkpolicy.yaml
-                        kubectl apply -f helm/templates/hpa.yaml
+                        kubectl apply -f helm/templates/rbac.yaml || true
+                        kubectl apply -f helm/templates/networkpolicy.yaml || true
+                        kubectl apply -f helm/templates/hpa.yaml || true
                     '''
                 }
             }
