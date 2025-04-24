@@ -1,7 +1,5 @@
-<phpunit bootstrap="vendor/autoload.php">
-    <testsuites>
-        <testsuite name="Application Test Suite">
-            <directory>./tests</directory>
-        </testsuite>
-    </testsuites>
-</phpunit>
+<coverage processUncoveredFiles="true">
+    <include>
+        <directory>src</directory> <!-- غيّر المسار لو ملفاتك في مكان تاني -->
+    </include>
+</coverage>

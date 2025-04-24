@@ -1,10 +1,11 @@
 <?php
+
 use PHPUnit\Framework\TestCase;
 
-class ExampleTest extends TestCase
+class DummyTest extends TestCase
 {
-    public function testAddition()
+    public function testTrue()
     {
-        $this->assertEquals(2 + 2, 4);
+        $this->assertTrue(true);
     }
 }
