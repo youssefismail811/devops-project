@@ -1,4 +1,4 @@
-# Low-Level Design (LLD) - Microservices E-Commerce Platform
+# Low-Level Design (LLD) - devops-project
 
 This document provides a detailed low-level design for the automated DevOps pipeline and infrastructure setup of a microservices-based e-commerce platform using AWS, Jenkins, Terraform, Ansible, Docker, Kubernetes (EKS), SonarQube, Vault, and other tools.
 

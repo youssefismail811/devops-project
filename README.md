@@ -51,12 +51,13 @@ S3 bucket & DynamoDB for remote state
 
 2️⃣ Configuration Management (Ansible)
 Install and configure tools on provisioned EC2 instances:
-
+```bash
 cd ansible
 ansible-playbook -i inventory setup.yml
+```
 
 Playbooks:
-```bash
+
 jenkins.yml – Installs Jenkins & plugins
 
 vault.yml – Installs HashiCorp Vault and enables KV secrets
@@ -64,7 +65,7 @@ vault.yml – Installs HashiCorp Vault and enables KV secrets
 sonarqube.yml – Installs and configures SonarQube
 
 Configures Jenkins integration with Vault and SonarQube
-```
+
 ---
 
 3️⃣ CI/CD Pipeline (Jenkins + GitHub)
@@ -93,15 +94,17 @@ Set GitHub webhook to trigger Jenkins.
 4️⃣ Kubernetes Deployment (Helm + EKS)
 Ensure your kubeconfig is set:
 
-
+```bash
 aws eks update-kubeconfig --name ecommerce-eks-cluster
+```
+
 Deploy all services using Helm:
 
-
+```bash
 cd helm-charts
 helm install checkout-service ./checkout
 helm install auth-service ./auth
-
+```
 Includes:
 
 Namespaces per service
