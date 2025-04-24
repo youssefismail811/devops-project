@@ -57,9 +57,6 @@ pipeline {
                             ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
                               -Dsonar.projectKey=devops-project \
                               -Dsonar.sources=. \
-                              -Dsonar.host.url=$SONAR_HOST_URL \
-                              -Dsonar.token=$SONAR_AUTH_TOKEN \
-                              -Dsonar.php.coverage.reportPaths=build/coverage/clover.xml
                         '''
                     }
                 }
