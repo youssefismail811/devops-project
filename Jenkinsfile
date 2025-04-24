@@ -39,7 +39,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo "=== Running PHP Unit Tests ==="
-                sh './vendor/bin/phpunit'
+                sh './vendor/bin/phpunit tests'
             }
         }
 
