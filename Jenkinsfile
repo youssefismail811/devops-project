@@ -58,10 +58,8 @@ pipeline {
                                 -Dsonar.projectKey=devops-project \
                                 -Dsonar.sources=. \
                                 -Dsonar.language=php \
-                                -Dsonar.exclusions=vendor/** \
+                                -Dsonar.exclusions=vendor/**,**/*.xsd,**/*.xml \
                                 -Dsonar.iac.cloudformation.enabled=false
-
-                                                         
                         '''
                     }
                 }

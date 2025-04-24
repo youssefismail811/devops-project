@@ -4,13 +4,13 @@ This project provides a complete DevOps pipeline for a cloud-native microservice
 
 ---
 
-##  Repository Structure
+## Repository Structure
 
 ├── terraform/ # Infrastructure as Code ├── ansible/ # Configuration management playbooks ├── jenkins/ # Jenkins pipeline setup ├── helm-charts/ # Kubernetes deployment files ├── vault/ # Vault configuration ├── docs/ # Documentation (LLD, IAM, security) └── README.md # This file
 
 ---
 
-##  Prerequisites
+## Prerequisites
 
 Ensure the following tools are installed:
 
@@ -51,7 +51,9 @@ S3 bucket & DynamoDB for remote state
 
 2️⃣ Configuration Management (Ansible)
 Install and configure tools on provisioned EC2 instances:
+
 ```bash
+
 cd ansible
 ansible-playbook -i inventory setup.yml
 ```
@@ -89,8 +91,6 @@ Deploy to EKS using Helm
 
 Set GitHub webhook to trigger Jenkins.
 
-
-
 4️⃣ Kubernetes Deployment (Helm + EKS)
 Ensure your kubeconfig is set:
 
@@ -105,6 +105,7 @@ cd helm-charts
 helm install checkout-service ./checkout
 helm install auth-service ./auth
 ```
+
 Includes:
 
 Namespaces per service
