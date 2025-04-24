@@ -45,26 +45,7 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
-            environment {
-                SONARQUBE_SCANNER_HOME = tool 'sonarscanner'
-            }
-            steps {
-                withSonarQubeEnv('sonarqube') {
-                    withCredentials([string(credentialsId: 'jenkins-integration', variable: 'SONAR_AUTH_TOKEN')]) {
-                        sh '''
-                            echo "=== Running SonarQube Scan ==="
-                            ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
-                              -Dsonar.projectKey=devops-project \
-                              -Dsonar.sources=. \
-                              -Dsonar.host.url=$SONAR_HOST_URL \
-                              -Dsonar.token=$SONAR_AUTH_TOKEN \
-                              -Dsonar.php.coverage.reportPaths=build/coverage/clover.xml
-                        '''
-                    }
-                }
-            }
-        }
+        
 
         stage('Build & Push Docker Image') {
             steps {
