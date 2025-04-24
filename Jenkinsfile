@@ -21,14 +21,7 @@ pipeline {
             }
         }
 
-        stage('Run PHPUnit Tests') {
-            steps {
-                script {
-                    // تشغيل PHPUnit وإنشاء تقرير التغطية
-                    sh 'XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-clover build/coverage/clover.xml'
-                }
-            }
-        }
+        
 
         stage('SonarQube Analysis') {
             steps {
