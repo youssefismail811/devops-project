@@ -2,45 +2,164 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'sonarqube' // اسم SonarQube الذي قمت بتخزينه في Jenkins
+        VAULT_ADDR = 'http://13.57.42.215:8200'
+        AWS_REGION = 'us-west-1'
+        ECR_REPO = 'devops-ecr-repo'
+        IMAGE_TAG = 'latest'
+        ACCOUNT_ID = '646304591001'
+        HELM_VERSION = '3.12.0'
+        NAMESPACE = 'default'
+        EKS_CLUSTER_NAME = 'eks'
+        PATH = "${env.HOME}/bin:${env.PATH}"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Verify Files') {
             steps {
-                checkout scm
+                sh 'ls -la'
+            }
+        }
+
+        stage('Configure Kubeconfig') {
+            steps {
+                sh '''
+                    echo "=== Setting up kubeconfig ==="
+                    aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
+                '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                script {
-                    // تثبيت الاعتماديات باستخدام Composer
-                    sh 'composer install'
-                }
+                echo "=== Installing PHP Dependencies with Composer ==="
+                sh 'composer install'
             }
         }
 
-        
-
-        stage('SonarQube Analysis') {
+        stage('Unit Tests') {
             steps {
-                script {
-                    // إرسال تقرير التغطية إلى SonarQube
-                    withSonarQubeEnv('sonarqube') {
-                        sh 'mvn sonar:sonar -Dsonar.php.coverage.reportPaths=build/coverage/clover.xml'
+                echo "=== Running PHP Unit Tests ==="
+                sh './vendor/bin/phpunit tests'
+            }
+        }
+
+        stage('SonarQube Scan') {
+            environment {
+                SONARQUBE_SCANNER_HOME = tool 'sonarscanner'
+            }
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    withCredentials([string(credentialsId: 'jenkins-integration', variable: 'SONAR_AUTH_TOKEN')]) {
+                        sh '''
+                            echo "=== Running SonarQube Scan ==="
+                            ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
+                              -Dsonar.projectKey=devops-project \
+                              -Dsonar.sources=. \
+                              -Dsonar.host.url=$SONAR_HOST_URL \
+                              -Dsonar.token=$SONAR_AUTH_TOKEN \
+                              -Dsonar.php.coverage.reportPaths=build/coverage/clover.xml
+                        '''
                     }
                 }
             }
         }
 
-        stage('Quality Gate') {
+        stage('Build & Push Docker Image') {
             steps {
-                script {
-                    // انتظار تحليل SonarQube للحصول على تقرير جودة الكود
-                    waitForQualityGate()
+                withVault(
+                    vaultSecrets: [[
+                        path: 'jenkins/aws',
+                        secretValues: [
+                            [envVar: 'AWS_ACCESS_KEY_ID', vaultKey: 'access_key'],
+                            [envVar: 'AWS_SECRET_ACCESS_KEY', vaultKey: 'secret_key']
+                        ]
+                    ]],
+                    configuration: [
+                        vaultCredentialId: 'jenkins-vault',
+                        vaultUrl: "${env.VAULT_ADDR}"
+                    ]
+                ) {
+                    sh '''
+                        echo "=== Logging in to AWS ECR ==="
+                        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                        aws ecr get-login-password --region $AWS_REGION | \
+                        docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+                        echo "=== Building Docker image ==="
+                        docker build -t $ECR_REPO:$IMAGE_TAG .
+
+                        echo "=== Tagging image ==="
+                        docker tag $ECR_REPO:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+                        echo "=== Pushing image to ECR ==="
+                        docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                    '''
                 }
             }
+        }
+
+        stage('Install Helm') {
+            steps {
+                sh '''
+                    echo "=== Installing Helm ==="
+                    mkdir -p ${HOME}/bin
+                    curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar -xz -C /tmp
+                    mv /tmp/linux-amd64/helm ${HOME}/bin/helm
+                    chmod +x ${HOME}/bin/helm
+                    ${HOME}/bin/helm version
+                '''
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                dir('helm') {
+                    sh '''
+                        echo "=== Deploying with Helm ==="
+                        helm upgrade --install my-app . \
+                            --namespace ${NAMESPACE} \
+                            --set image.repository=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO} \
+                            --set image.tag=${IMAGE_TAG} \
+                            --atomic \
+                            --timeout 5m \
+                            --wait
+
+                        kubectl apply -f templates/rbac.yaml || true
+                        kubectl apply -f templates/networkpolicy.yaml || true
+                        kubectl apply -f templates/hpa.yaml || true
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    echo "=== Verifying Deployment ==="
+                    helm status my-app -n ${NAMESPACE}
+                    kubectl get pods -n ${NAMESPACE}
+                    kubectl get svc -n ${NAMESPACE}
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+            sh '''
+                echo "=== Cleaning up Docker ==="
+                docker rmi ${ECR_REPO}:${IMAGE_TAG} || true
+                docker rmi ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} || true
+                docker system prune -f || true
+            '''
+        }
+        failure {
+            sh '''
+                echo "=== Attempting Rollback ==="
+                helm rollback my-app 0 -n ${NAMESPACE} || true
+            '''
         }
     }
 }
