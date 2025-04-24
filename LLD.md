@@ -39,7 +39,6 @@ The goal of this project is to implement a cloud-native microservices-based e-co
       | RDS PostgreSQL DB    |
       +----------------------+
 
-
 ---
 
 ## 3. **Infrastructure Design**
@@ -47,10 +46,10 @@ The goal of this project is to implement a cloud-native microservices-based e-co
 ### 3.1 **AWS Resources**
 
 - **VPC (Virtual Private Cloud)**: Configured with public and private subnets, NAT Gateway, and Internet Gateway.
-- **EC2 Instances**: 
-    - Jenkins: Used for CI/CD automation.
-    - Vault: Stores sensitive information.
-    - SonarQube: Used for code quality checks.
+- **EC2 Instances**:
+- Jenkins: Used for CI/CD automation.
+- Vault: Stores sensitive information.
+- SonarQube: Used for code quality checks.
 - **EKS (Elastic Kubernetes Service)**: Kubernetes cluster for deploying the microservices.
 - **RDS**: PostgreSQL instance to store application data.
 - **S3**: For storing Terraform state securely.
@@ -171,4 +170,3 @@ The deployment process is automated as part of the CI/CD pipeline. Once the Dock
 ## 11. **Conclusion**
 
 This Low-Level Design outlines how the microservices-based e-commerce platform is structured, from infrastructure setup on AWS to the deployment of microservices on EKS. The project follows best practices in security, scalability, and automation, leveraging the power of AWS, Terraform, Jenkins, Kubernetes, and Vault.
-

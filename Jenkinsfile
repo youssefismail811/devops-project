@@ -55,8 +55,11 @@ pipeline {
                         sh '''
                             echo "=== Running SonarQube Scan ==="
                             ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
-                              -Dsonar.projectKey=devops-project \
-                              -Dsonar.sources=. \
+                                sonar.projectKey=devops-project
+                                sonar.sources=.
+                                sonar.language=php
+                                sonar.exclusions=**/*.vb \
+                                                         
                         '''
                     }
                 }
