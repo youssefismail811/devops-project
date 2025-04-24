@@ -47,7 +47,7 @@ pipeline {
 
         stage('SonarQube Scan') {
             environment {
-                SONARQUBE_SCANNER_HOME = tool 'youssef'
+                SONARQUBE_SCANNER_HOME = tool 'sonarscanner'
             }
             steps {
                 withSonarQubeEnv('sonarqube') {
