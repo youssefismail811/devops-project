@@ -1,13 +1,23 @@
 {
-    "name": "youssefismail811/devops-project",
-    "description": "A simple PHP project for DevOps pipeline testing",
+    "name": "youssef/devops-project",
+    "description": "A simple PHP project with CI/CD",
     "type": "project",
-    "require": {
+    "require": {},
+    "require-dev": {
+      "phpunit/phpunit": "^10.0"
     },
     "autoload": {
       "psr-4": {
         "App\\": "src/"
       }
+    },
+    "autoload-dev": {
+      "psr-4": {
+        "Tests\\": "tests/"
+      }
+    },
+    "scripts": {
+      "test": "phpunit"
     },
     "minimum-stability": "stable",
     "license": "MIT"
