@@ -45,7 +45,22 @@ pipeline {
             }
         }
 
-        
+        stage('SonarQube Analysis') {
+            environment {
+                SONAR_TOKEN = credentials('sonar-token')
+            }
+            steps {
+                withSonarQubeEnv("${sonarqube}") {
+                    sh '''
+                    sonar-scanner \
+                      -Dsonar.projectKey=devops-project \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=$SONAR_HOST_URL \
+                      -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
+            }
+        }
 
         stage('Build & Push Docker Image') {
             steps {
