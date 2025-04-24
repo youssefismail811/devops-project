@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     // تشغيل PHPUnit وإنشاء تقرير التغطية
-                    sh './vendor/bin/phpunit --coverage-clover build/coverage/clover.xml'
+                    sh 'XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-clover build/coverage/clover.xml'
                 }
             }
         }
