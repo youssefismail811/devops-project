@@ -48,14 +48,14 @@ pipeline {
                 SONARQUBE_SCANNER_HOME = tool 'sonarscanner'
             }
             steps {
-                withSonarQubeEnv('sonarqube') {
+                withSonarQubeEnv('SONARQUBE_SERVER') {
                     sh '''
                         echo "=== Running SonarQube Scan ==="
                         ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
                           -Dsonar.projectKey=devops-project \
                           -Dsonar.sources=. \
                           -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                          -Dsonar.token=$SONAR_AUTH_TOKEN
                     '''
                 }
             }
