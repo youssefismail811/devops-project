@@ -33,6 +33,7 @@ Provision AWS resources:
 cd terraform
 terraform init
 terraform apply -var-file="dev.tfvars"
+```
 
 Provisioned resources:
 
@@ -55,7 +56,7 @@ cd ansible
 ansible-playbook -i inventory setup.yml
 
 Playbooks:
-
+```bash
 jenkins.yml – Installs Jenkins & plugins
 
 vault.yml – Installs HashiCorp Vault and enables KV secrets
@@ -63,7 +64,7 @@ vault.yml – Installs HashiCorp Vault and enables KV secrets
 sonarqube.yml – Installs and configures SonarQube
 
 Configures Jenkins integration with Vault and SonarQube
-
+```
 ---
 
 3️⃣ CI/CD Pipeline (Jenkins + GitHub)
