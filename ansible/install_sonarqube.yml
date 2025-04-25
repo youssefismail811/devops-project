@@ -7,7 +7,7 @@
     sonar_user: sonar
     sonar_password: sonar
     sonar_db: sonardb
-    sonar_download_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-10.4.1.zip"
+    sonar_download_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonar_version }}.zip"
 
   tasks:
 
