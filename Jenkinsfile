@@ -14,6 +14,17 @@ pipeline {
     }
 
     stages {
+        
+        stage('Clone Git Repository') {
+            steps {
+                script {
+                    // أمر git clone لتحميل المستودع من GitHub
+                    sh 'git clone https://github.com/youssefismail811/devops-project.git'
+                }
+            }
+        
+        
+        
         stage('Verify Files') {
             steps {
                 sh 'ls -la'
