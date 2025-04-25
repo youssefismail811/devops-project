@@ -61,6 +61,7 @@ pipeline {
                                 -Dsonar.language=php \
                                 -Dsonar.exclusions=vendor/**,**/*.xsd,**/*.xml \
                                 -Dsonar.iac.cloudformation.enabled=false
+                                -Dsonar.ws.timeout=900
                         '''
                     }
                 }
