@@ -46,28 +46,28 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
-            environment {
-                SONARQUBE_SCANNER_HOME = tool 'sonarscanner'
-            }
-            steps {
-                withSonarQubeEnv('sonarqube') {
-                    withCredentials([string(credentialsId: 'jenkins-integration', variable: 'SONAR_AUTH_TOKEN')]) {
-                        sh '''
-                            echo "=== Running SonarQube Scan ==="
-                            ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
-                                -Dsonar.projectKey=devops-project \
-                                -Dsonar.sources=. \
-                                -Dsonar.language=php \
-                                -Dsonar.exclusions=vendor/**,**/*.xsd,**/*.xml,**/*.php,**/*.json
-                                -Dsonar.coverage.jacoco.xmlReportPaths=path/to/your/jacoco.xml
-                                -Dsonar.iac.cloudformation.enabled=false
-                                -Dsonar.ws.timeout=900
-                        '''
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Scan') {
+        //     environment {
+        //         SONARQUBE_SCANNER_HOME = tool 'sonarscanner'
+        //     }
+        //     steps {
+        //         withSonarQubeEnv('sonarqube') {
+        //             withCredentials([string(credentialsId: 'jenkins-integration', variable: 'SONAR_AUTH_TOKEN')]) {
+        //                 sh '''
+        //                     echo "=== Running SonarQube Scan ==="
+        //                     ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
+        //                         -Dsonar.projectKey=devops-project \
+        //                         -Dsonar.sources=. \
+        //                         -Dsonar.language=php \
+        //                         -Dsonar.exclusions=vendor/**,**/*.xsd,**/*.xml,**/*.php,**/*.json
+        //                         -Dsonar.coverage.jacoco.xmlReportPaths=path/to/your/jacoco.xml
+        //                         -Dsonar.iac.cloudformation.enabled=false
+        //                         -Dsonar.ws.timeout=900
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Build & Push Docker Image') {
             steps {

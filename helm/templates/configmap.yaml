@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-config
+  namespace: mint
+data:
+  DB_HOST: "mint-db.internal"
+  DB_PORT: "5432"
+  ENVIRONMENT: "mint"

@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: user-service-ingress
+  namespace: mint
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: mint.youssef.dev
+    http:
+      paths:
+      - path: /user-service
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 80
