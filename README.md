@@ -133,7 +133,7 @@ No secrets in code: All credentials managed via Vault
 ✅ SonarQube scan passes quality gates
 ✅ Infrastructure reproducible via Terraform
 
-📄 Documentation.,xيي
+📄 Documentation.,xييdx
 docs/LLD.md: Low-Level Design
 
 docs/iam-roles.md: IAM role descriptions
