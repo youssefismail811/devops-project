@@ -59,9 +59,8 @@ pipeline {
                                 -Dsonar.projectKey=devops-project \
                                 -Dsonar.sources=. \
                                 -Dsonar.language=php \
-                                 -Dsonar.analysis.mode=preview
-                                 -Dsonar.exclusions=**
-                                -Dsonar.iac.cloudformation.enabled=false
+                                -Dsonar.analysis.mode=preview \
+                                -Dsonar.exclusions=**
                                 -Dsonar.ws.timeout=900
                         '''
                     }
