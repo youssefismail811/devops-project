@@ -59,7 +59,7 @@ pipeline {
                                 -Dsonar.projectKey=devops-project \
                                 -Dsonar.sources=. \
                                 -Dsonar.language=php \
-                                -Dsonar.exclusions=vendor/**,**/*.xsd,**/*.xml,**/*.php,**/*.yaml,**/*.json
+                                -Dsonar.exclusions=vendor/**,**/*.xsd,**/*.xml,**/*.php,**/*.json
                                 -Dsonar.coverage.jacoco.xmlReportPaths=path/to/your/jacoco.xml
                                 -Dsonar.iac.cloudformation.enabled=false
                                 -Dsonar.ws.timeout=900
